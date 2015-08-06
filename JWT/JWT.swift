@@ -4,7 +4,7 @@ import CryptoSwift
 public typealias Payload = [String:AnyObject]
 
 /// The supported Algorithms
-public enum Algorithm : Printable {
+public enum Algorithm : CustomStringConvertible {
   /// No Algorithm, i-e, insecure
   case None
 
@@ -83,14 +83,16 @@ public enum Algorithm : Printable {
 // MARK: Encoding
 
 /*** Encode a payload
-  :param: payload The payload to sign
-  :param: algorithm The algorithm to sign the payload with
-  :returns: The JSON web token as a String
+  - parameter payload: The payload to sign
+  - parameter algorithm: The algorithm to sign the payload with
+  - returns: The JSON web token as a String
 */
 public func encode(payload:Payload, algorithm:Algorithm) -> String {
   func encodeJSON(payload:Payload) -> String? {
-    if let data = NSJSONSerialization.dataWithJSONObject(payload, options: NSJSONWritingOptions(0), error: nil) {
+    do {
+      let data = try NSJSONSerialization.dataWithJSONObject(payload, options: NSJSONWritingOptions(rawValue: 0))
       return base64encode(data)
+    } catch _ {
     }
 
     return nil
@@ -176,5 +178,5 @@ public class PayloadBuilder {
 public func encode(algorithm:Algorithm, closure:(PayloadBuilder -> ())) -> String {
   let builder = PayloadBuilder()
   closure(builder)
-  return encode(builder.payload, algorithm)
+  return encode(builder.payload, algorithm: algorithm)
 }
